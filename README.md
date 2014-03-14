@@ -11,10 +11,9 @@ In the case of CloudFront, you will need to invalidate items or wait for the cac
 A solution to this problem is adding a revisioned number to the name your static assets.  The gulp plugin [gulp-rev-all](https://github.com/smysnk/gulp-rev-all) can assist in this process.  eg. unicorn.css => unicorn-098f6bcd.css
 You can then use [gulp-s3](https://github.com/nkostelnik/gulp-s3)* to upload the revisioned files to a S3 bucket which CloudFront points to.
 
-**Finally gulp-cloudfront comes in during the final step, to update a CloudFronts' distribution Default Root Object to the latest revisioned index.html.**  
+**Finally gulp-cloudfront comes in during the final step, to update a CloudFront distributions' Default Root Object to the latest revisioned index.html.**  
 Updating the Default Root Object only takes 5-10 minutes and all new visitors to your website will no longer see the old cached content.
-
-* Note: I have submitted a [pull request](https://github.com/nkostelnik/gulp-s3/pull/7) to gulp-s3 as it currently does not support file contents from streams, which makes it incompatible with [gulp-gzip](https://github.com/jstuckey/gulp-gzip).  In the mean time you can use my forked version [here](https://github.com/smysnk/gulp-s3).
+A much better solution than waiting for cached items to expire or invalidating individual files which costs $$.
 
 ## Install
 
@@ -52,6 +51,9 @@ gulp.task('default', function () {
 });
 ```
 
+## Additional
+
+ * A [pull request](https://github.com/nkostelnik/gulp-s3/pull/7) to gulp-s3 as it currently does not support file contents from streams, which makes it incompatible with [gulp-gzip](https://github.com/jstuckey/gulp-gzip).  In the mean time you can use my forked version [here](https://github.com/smysnk/gulp-s3).
 
 ## License
 
