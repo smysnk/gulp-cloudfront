@@ -5,10 +5,10 @@
 ## Purpose
 
 Content distribution networks like [CloudFront](http://aws.amazon.com/cloudfront/) let you cache static assets in [Edge Locations](http://aws.amazon.com/about-aws/globalinfrastructure/) for extended periods of time.
-A problem occurs however when you go to release a new version of your website, previous visitors of your website will hit their cache instead.
+A problem occurs however when you go to release a new version of your website, you will have to explictly tell CloudFront to expire each file or you will have to wait for the [TTL to expire](http://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Expiration.html).
 In the case of CloudFront, you will need to invalidate items or wait for the cache TTL to expire before vistors of your website will see the vew version.
 
-A solution to this problem is adding a revisioned number to the name your static assets.  The gulp plugin [gulp-rev-all](https://github.com/smysnk/gulp-rev-all) can assist in this process.  eg. unicorn.css => unicorn-098f6bcd.css
+A solution to this problem is adding a revisioned suffix to the filename for each static asset.  The gulp plugin [gulp-rev-all](https://github.com/smysnk/gulp-rev-all) can assist in this process.  eg. unicorn.css => unicorn-098f6bcd.css
 You can then use [gulp-s3](https://github.com/nkostelnik/gulp-s3)* to upload the revisioned files to a S3 bucket which CloudFront points to.
 
 **Finally gulp-cloudfront comes in during the final step, to update a CloudFront distributions' Default Root Object to the latest revisioned index.html.**  
@@ -36,7 +36,7 @@ var options = { gzippedOnly: true };
 var aws = {
     "key": "AKIAI3Z7CUAFHG53DMJA",
     "secret": "acYxWRu5RRa6CwzQuhdXEfTpbQA+1XQJ7Z1bGTCx",
-    "bucket": "dev.example.com",
+    "bucket": "bucket-name",
     "region": "eu-west-1",
     "distributionId": "E1SYAKGEMSK3OD"
 };
@@ -44,9 +44,9 @@ var aws = {
 gulp.task('default', function () {
     gulp.src('dist/**')
         .pipe(revall())
-        .pipe(cloudfront(aws))
         .pipe(gzip())
         .pipe(s3(aws, options));
+        .pipe(cloudfront(aws))
         
 });
 ```

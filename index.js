@@ -3,7 +3,6 @@ var fs = require('fs');
 var path = require('path');
 var gutil = require('gulp-util');
 var AWS = require('aws-sdk');
-var map = require('map-stream');
 var Q = require('q');
 var through = require('through2');
 
@@ -58,20 +57,14 @@ module.exports = function(options) {
 
         var self = this;
 
-        if (file.isNull()) {
-            return callback(null, file);
-        } else if (file.isStream()) {
-            throw new Error('Streams are not supported!');
-        } 
-
         // Update the default root object once we've found the index.html file
-        if (file.path.match(/index\-[a-f0-9]{8}\.html/gi)) {            
+        if (file.path.match(/index\-[a-f0-9]{8}\.html$/gi)) {            
 
             updateDefaultRootObject(path.basename(file.path))
                 .then(function() {
                     return callback(null, file);                
                 }, function(err) {
-                    self.emit('error', new gutil.PluginError('gulp-cloudfront', err));
+                    gutil.log(new gutil.PluginError('gulp-cloudfront', err));
                     callback(null, file);
 
                 })
