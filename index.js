@@ -24,14 +24,16 @@ module.exports = function(options) {
             if (err) {                
                 deferred.reject(err);
             } else {
-                
+
                 // AWS Service returns errors if we don't fix these
-                data.DistributionConfig.Comment = '';
-                data.DistributionConfig.Logging.Bucket = '';
-                data.DistributionConfig.Logging.Prefix = '';
-                data.DistributionConfig.DefaultRootObject = defaultRootObject;
+                if (data.DistributionConfig.Comment == null) data.DistributionConfig.Comment = '';
+                if (data.DistributionConfig.Logging.Enabled == false) {
+                    data.DistributionConfig.Logging.Bucket = '';
+                    data.DistributionConfig.Logging.Prefix = '';
+                }                
 
                 // Update the distribution with the new default root object
+                data.DistributionConfig.DefaultRootObject = defaultRootObject;
                 cloudfront.updateDistribution({
                     IfMatch: data.ETag,
                     Id: options.distributionId,
