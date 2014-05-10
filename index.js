@@ -34,6 +34,9 @@ module.exports = function(options) {
 
                 // Update the distribution with the new default root object
                 data.DistributionConfig.DefaultRootObject = defaultRootObject;
+                if (data.DistributionConfig.Origins.Items[0].S3OriginConfig.OriginAccessIdentity === null) {
+                  data.DistributionConfig.Origins.Items[0].S3OriginConfig.OriginAccessIdentity = '';
+                }
                 cloudfront.updateDistribution({
                     IfMatch: data.ETag,
                     Id: options.distributionId,
