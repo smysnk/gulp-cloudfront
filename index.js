@@ -21,7 +21,7 @@ module.exports = function(options) {
         // Get the existing distribution id
         cloudfront.getDistribution({ Id: options.distributionId }, function(err, data) {
 
-            if (err) {                
+            if (err) {
                 deferred.reject(err);
             } else {
 
@@ -30,7 +30,7 @@ module.exports = function(options) {
                 if (data.DistributionConfig.Logging.Enabled == false) {
                     data.DistributionConfig.Logging.Bucket = '';
                     data.DistributionConfig.Logging.Prefix = '';
-                }                
+                }
 
                 // Update the distribution with the new default root object
                 data.DistributionConfig.DefaultRootObject = defaultRootObject;
@@ -42,8 +42,8 @@ module.exports = function(options) {
                     Id: options.distributionId,
                     DistributionConfig: data.DistributionConfig
                 }, function(err, data) {
-                    
-                    if (err) {                
+
+                    if (err) {
                         deferred.reject(err);
                     } else {
                         deferred.resolve();
@@ -52,7 +52,7 @@ module.exports = function(options) {
                 });
 
             }
-        });   
+        });
 
         return deferred.promise;
 
@@ -63,11 +63,15 @@ module.exports = function(options) {
         var self = this;
 
         // Update the default root object once we've found the index.html file
-        if (file.path.match(/index\-[a-f0-9]{8}\.html$/gi)) {            
+        var p = filePath.path;
+        if (p.match(/index\-[a-f0-9]{8}\.html\.gz$/gi)) {
+            p = p.substring(0, p.length - 3);
+        }
+        if (p.match(/index\-[a-f0-9]{8}\.html$/gi)) {
 
-            updateDefaultRootObject(path.basename(file.path))
+            updateDefaultRootObject(path.basename(p))
                 .then(function() {
-                    return callback(null, file);                
+                    return callback(null, file);
                 }, function(err) {
                     gutil.log(new gutil.PluginError('gulp-cloudfront', err));
                     callback(null, file);
