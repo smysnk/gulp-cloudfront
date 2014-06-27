@@ -57,7 +57,7 @@ gulp.task('default', function () {
 
 ## API
 
-#### options.indexPattern
+#### options.patternIndex
 
 Type: `Regular Expression`
 Default: `/^\/index\-[a-f0-9]{8}\.html(\.gz)*$/gi`
@@ -68,7 +68,7 @@ Specify the pattern used to match the default root object
 ..
 var aws = {
     ..,
-    "indexPattern": /^\/root\-[a-f0-9]{4}\.html(\.gz)*$/gi
+    "patternIndex": /^\/root\-[a-f0-9]{4}\.html(\.gz)*$/gi
 };
 
 gulp.task('default', function () {
