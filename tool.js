@@ -30,11 +30,13 @@ module.exports = function(options) {
                     data.DistributionConfig.Logging.Prefix = '';
                 }
 
+                // Causing problems on a default cloudfront setup, why is this needed?
+                // if (data.DistributionConfig.Origins.Items[0].S3OriginConfig.OriginAccessIdentity === null) {
+                //   data.DistributionConfig.Origins.Items[0].S3OriginConfig.OriginAccessIdentity = '';
+                // }
+
                 // Update the distribution with the new default root object
                 data.DistributionConfig.DefaultRootObject = defaultRootObject;
-                if (data.DistributionConfig.Origins.Items[0].S3OriginConfig.OriginAccessIdentity === null) {
-                  data.DistributionConfig.Origins.Items[0].S3OriginConfig.OriginAccessIdentity = '';
-                }
 
                 cloudfront.updateDistribution({
                     IfMatch: data.ETag,
