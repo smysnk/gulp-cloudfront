@@ -46,8 +46,7 @@ describe("gulp-cloudfront", function () {
         };
 
         stream = cloundfront({ 
-            tool: tool,
-//            dirRoot: dirRoot
+            tool: tool
         });
         stream.on('data', function (file) {});
         stream.on('end', function () {
@@ -74,8 +73,7 @@ describe("gulp-cloudfront", function () {
         };
 
         stream = cloundfront({ 
-            tool: tool,
-//            dirRoot: dirRoot
+            tool: tool
         });
         stream.on('data', function (file) {});
         stream.on('end', function () {
@@ -102,8 +100,7 @@ describe("gulp-cloudfront", function () {
 
         stream = cloundfront({
             patternIndex: /^\/custom\.[a-f0-9]{4}\.html$/gi,
-            tool: tool,
-//            dirRoot: dirRoot
+            tool: tool
         });
         stream.on('data', function (file) {});        
         stream.on('end', function () {
