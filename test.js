@@ -1,5 +1,5 @@
-var cloundfront = require("../index");
-var toolFactory = require("../tool");
+var cloundfront = require("./index");
+var toolFactory = require("./tool");
 var should = require("should");
 var gulp = require("gulp");
 var es = require("event-stream");
@@ -19,11 +19,12 @@ describe("gulp-cloudfront", function () {
     var stream;
     var writeFile = function(globPath) {
         //write all files to stream
-        glob(globPath, {}, function (er, fileNames) {
+        glob(globPath + "/**/*.*", {}, function (er, fileNames) {
             fileNames.forEach(function (fileName) {
                 stream.write(new gutil.File({
-                    path: fileName,
-                    contents: fs.readFileSync(fileName)
+                    path: path.join(__dirname, fileName),
+                    contents: fs.readFileSync(fileName),
+                    base: path.join(__dirname, globPath)
                 }));
             });
 
@@ -46,7 +47,7 @@ describe("gulp-cloudfront", function () {
 
         stream = cloundfront({ 
             tool: tool,
-            dirRoot: dirRoot
+//            dirRoot: dirRoot
         });
         stream.on('data', function (file) {});
         stream.on('end', function () {
@@ -54,7 +55,7 @@ describe("gulp-cloudfront", function () {
             done();
         });
 
-        writeFile(dirRoot + '/**/*.*');
+        writeFile(dirRoot);
 
     });
 
@@ -74,7 +75,7 @@ describe("gulp-cloudfront", function () {
 
         stream = cloundfront({ 
             tool: tool,
-            dirRoot: dirRoot
+//            dirRoot: dirRoot
         });
         stream.on('data', function (file) {});
         stream.on('end', function () {
@@ -82,7 +83,7 @@ describe("gulp-cloudfront", function () {
             done();
         });
 
-        writeFile(dirRoot + '/**/*.*');
+        writeFile(dirRoot);
 
     });
 
@@ -100,9 +101,9 @@ describe("gulp-cloudfront", function () {
         };
 
         stream = cloundfront({
-            patternIndex: /\/custom\.[a-f0-9]{4}\.html$/gi,
+            patternIndex: /^\/custom\.[a-f0-9]{4}\.html$/gi,
             tool: tool,
-            dirRoot: dirRoot
+//            dirRoot: dirRoot
         });
         stream.on('data', function (file) {});        
         stream.on('end', function () {
@@ -110,7 +111,7 @@ describe("gulp-cloudfront", function () {
             done();
         });
 
-        writeFile(dirRoot + '/**/*.*');
+        writeFile(dirRoot);
     });
 
 

@@ -2,6 +2,8 @@ var fs = require('fs');
 var path = require('path');
 var crypto = require('crypto');
 var gutil = require('gulp-util');
+var AWS = require('aws-sdk');
+var Q = require('q');
 
 module.exports = function(options) {
 

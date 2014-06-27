@@ -1,6 +1,6 @@
 {
   "name": "gulp-cloudfront",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "",
   "main": "index.js",
   "dependencies": {
@@ -23,7 +23,7 @@
     "sinon": "~1.10.2"
   },
   "scripts": {
-    "test": "mocha test/test.js"
+    "test": "mocha test.js"
   },
   "repository": {
     "type": "git",
