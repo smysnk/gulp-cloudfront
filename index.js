@@ -1,82 +1,39 @@
-var es = require('event-stream');
-var fs = require('fs');
-var path = require('path');
 var gutil = require('gulp-util');
-var AWS = require('aws-sdk');
-var Q = require('q');
 var through = require('through2');
+var toolFactory = require('./tool');
 
 module.exports = function(options) {
 
     options = options || {};
-    var cloudfront = new AWS.CloudFront({
-        accessKeyId: options.key,
-        secretAccessKey: options.secret
-    });
-
-    var updateDefaultRootObject = function (defaultRootObject) {
-
-        var deferred = Q.defer();
-
-        // Get the existing distribution id
-        cloudfront.getDistribution({ Id: options.distributionId }, function(err, data) {
-
-            if (err) {
-                deferred.reject(err);
-            } else {
-
-                // AWS Service returns errors if we don't fix these
-                if (data.DistributionConfig.Comment == null) data.DistributionConfig.Comment = '';
-                if (data.DistributionConfig.Logging.Enabled == false) {
-                    data.DistributionConfig.Logging.Bucket = '';
-                    data.DistributionConfig.Logging.Prefix = '';
-                }
-
-                // Update the distribution with the new default root object
-                data.DistributionConfig.DefaultRootObject = defaultRootObject;
-                if (data.DistributionConfig.Origins.Items[0].S3OriginConfig.OriginAccessIdentity === null) {
-                  data.DistributionConfig.Origins.Items[0].S3OriginConfig.OriginAccessIdentity = '';
-                }
-                cloudfront.updateDistribution({
-                    IfMatch: data.ETag,
-                    Id: options.distributionId,
-                    DistributionConfig: data.DistributionConfig
-                }, function(err, data) {
-
-                    if (err) {
-                        deferred.reject(err);
-                    } else {
-                        deferred.resolve();
-                    }
-
-                });
-
-            }
-        });
-
-        return deferred.promise;
-
-    };
+    options.patternIndex = options.patternIndex || /\/index\.[a-f0-9]{8}\.html(\.gz)*$/gi;
+    var tool = options.tool || toolFactory(options);
+    var first = true;
 
     return through.obj(function (file, enc, callback) {
 
-        var self = this;
+        if (first) {
+            options.dirRoot = options.dirRoot || file.base;
+            gutil.log('gulp-cloudfront:', 'Root directory [', options.dirRoot, ']');
+            first = !first;
+        }
 
         // Update the default root object once we've found the index.html file
-        var p = filePath.path;
-        if (p.match(/index\-[a-f0-9]{8}\.html\.gz$/gi)) {
-            p = p.substring(0, p.length - 3);
-        }
-        if (p.match(/index\-[a-f0-9]{8}\.html$/gi)) {
+        var filename = file.path.substr(options.dirRoot.length);
+        if (filename.match(options.patternIndex)) {   
 
-            updateDefaultRootObject(path.basename(p))
+            // Trim the '.gz' if gzipped
+            if (filename.substr(filename.length - 3) === '.gz') {
+                filename = filename.substr(0, filename.length - 3);
+            }
+
+            tool.updateDefaultRootObject(filename)
                 .then(function() {
                     return callback(null, file);
                 }, function(err) {
                     gutil.log(new gutil.PluginError('gulp-cloudfront', err));
                     callback(null, file);
 
-                })
+                });
 
         } else {
             return callback(null, file);

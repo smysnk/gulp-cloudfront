@@ -15,6 +15,10 @@ You can then use [gulp-s3](https://github.com/nkostelnik/gulp-s3) to upload the 
 Updating the Default Root Object only takes 5-10 minutes and all new visitors to your website will no longer see the old cached content.
 A much better solution than waiting for cached items to expire or invalidating individual files which costs $$.
 
+## Under the Hood
+
+This plugin will identify the index.html file based on default or configured pattern
+
 ## Install
 
 Install with [npm](https://npmjs.org/package/gulp-rev-all)
@@ -50,6 +54,33 @@ gulp.task('default', function () {
         
 });
 ```
+
+## API
+
+#### options.indexPattern
+
+Type: `Regular Expression`
+Default: `/index\-[a-f0-9]{8}\.html(\.gz)*$/gi`
+
+Specify the pattern used to match the default root object
+
+```js
+..
+var aws = {
+    ..,
+    "indexPattern": /\/index\-[a-f0-9]{8}\.html(\.gz)*$/gi
+};
+
+gulp.task('default', function () {
+    gulp.src('dist/**')
+        .pipe(revall())
+        .pipe(gzip())
+        .pipe(s3(aws, options))
+        .pipe(cloudfront(aws));
+        
+});
+```
+
 
 ## License
 
