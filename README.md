@@ -17,11 +17,11 @@ A much better solution than waiting for cached items to expire or invalidating i
 
 ## Under the Hood
 
-This plugin will identify the index.html file based on default or configured pattern
+This plugin will identify the index.html file based on the default or configured pattern.  Once identified it will update the CloudFront distribution to the new index file.
 
 ## Install
 
-Install with [npm](https://npmjs.org/package/gulp-rev-all)
+Install with [npm](https://npmjs.org)
 
 ```
 npm install --save-dev gulp-cloudfront
@@ -31,29 +31,34 @@ npm install --save-dev gulp-cloudfront
 
 ```js
 var gulp = require('gulp');
-var s3 = require("gulp-s3");
 var revall = require('gulp-rev-all');
-var gzip = require("gulp-gzip");
+var awspublish = require('gulp-awspublish');
 var cloudfront = require("gulp-cloudfront");
 
-var options = { gzippedOnly: true };
 var aws = {
     "key": "AKIAI3Z7CUAFHG53DMJA",
     "secret": "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",
     "bucket": "bucket-name",
-    "region": "eu-west-1",
+    "region": "us-standard",
     "distributionId": "E1SYAKGEMSK3OD"
 };
+
+var publisher = awspublish.create(aws);
+var headers = {'Cache-Control': 'max-age=315360000, no-transform, public'};
 
 gulp.task('default', function () {
     gulp.src('dist/**')
         .pipe(revall())
-        .pipe(gzip())
-        .pipe(s3(aws, options))
+        .pipe(awspublish.gzip())
+        .pipe(publisher.publish(headers))
+        .pipe(publisher.cache())
+        .pipe(awspublish.reporter())
         .pipe(cloudfront(aws));
-        
 });
 ```
+
+  * See [gulp-awspublish](https://www.npmjs.org/package/gulp-awspublish), [gulp-rev-all](https://www.npmjs.org/package/gulp-rev-all)
+
 
 ## API
 
@@ -65,20 +70,12 @@ Default: `/^\/index\-[a-f0-9]{8}\.html(\.gz)*$/gi`
 Specify the pattern used to match the default root object
 
 ```js
-..
+
 var aws = {
     ..,
     "patternIndex": /^\/root\-[a-f0-9]{4}\.html(\.gz)*$/gi
 };
 
-gulp.task('default', function () {
-    gulp.src('dist/**')
-        .pipe(revall())
-        .pipe(gzip())
-        .pipe(s3(aws, options))
-        .pipe(cloudfront(aws));
-        
-});
 ```
 
 
