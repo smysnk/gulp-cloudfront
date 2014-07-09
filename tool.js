@@ -4,6 +4,7 @@ var crypto = require('crypto');
 var gutil = require('gulp-util');
 var AWS = require('aws-sdk');
 var Q = require('q');
+var gutil = require('gulp-util');
 
 module.exports = function(options) {
 
@@ -35,6 +36,11 @@ module.exports = function(options) {
                 //   data.DistributionConfig.Origins.Items[0].S3OriginConfig.OriginAccessIdentity = '';
                 // }
 
+                if (data.DistributionConfig.DefaultRootObject === defaultRootObject.substr(1)) {
+                    gutil.log('gulp-cloudfront:', "DefaultRootObject hasn't changed, not updating.");
+                    return deferred.resolve();
+                }
+
                 // Update the distribution with the new default root object (trim the precedeing slash)
                 data.DistributionConfig.DefaultRootObject = defaultRootObject.substr(1);
 
@@ -47,6 +53,7 @@ module.exports = function(options) {
                     if (err) {
                         deferred.reject(err);
                     } else {
+                        gutil.log('gulp-cloudfront:', 'DefaultRootObject updated to [' + defaultRootObject.substr(1) + '].');
                         deferred.resolve();
                     }
 
