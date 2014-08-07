@@ -13,7 +13,9 @@ You can then use [gulp-s3](https://github.com/nkostelnik/gulp-s3) to upload the 
 
 **Finally gulp-cloudfront comes in during the final step, to update a CloudFront distributions' [Default Root Object](http://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/DefaultRootObject.html) to the latest revisioned index.html.**  
 Updating the Default Root Object only takes 5-10 minutes and all new visitors to your website will no longer see the old cached content.
-A much better solution than waiting for cached items to expire or invalidating individual files which costs $$.
+A much better solution than waiting for cached items to expire or invalidating individual files which costs $$. 
+
+You can in essence host multiple versions of your website under the same static host and if you need to revert to an older version you need only change the index.html file.
 
 ## Under the Hood
 
