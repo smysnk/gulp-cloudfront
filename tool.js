@@ -32,9 +32,9 @@ module.exports = function(options) {
                 }
 
                 // Causing problems on a default cloudfront setup, why is this needed?
-                // if (data.DistributionConfig.Origins.Items[0].S3OriginConfig.OriginAccessIdentity === null) {
-                //   data.DistributionConfig.Origins.Items[0].S3OriginConfig.OriginAccessIdentity = '';
-                // }
+                if (data.DistributionConfig.Origins.Items[0].S3OriginConfig.OriginAccessIdentity === null) {
+                   data.DistributionConfig.Origins.Items[0].S3OriginConfig.OriginAccessIdentity = '';
+                }
 
                 if (data.DistributionConfig.DefaultRootObject === defaultRootObject.substr(1)) {
                     gutil.log('gulp-cloudfront:', "DefaultRootObject hasn't changed, not updating.");
