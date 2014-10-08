@@ -5,7 +5,7 @@ var toolFactory = require('./tool');
 module.exports = function(options) {
 
     options = options || {};
-    options.patternIndex = options.patternIndex || /^\/index\.[a-f0-9]{8}\.html(\.gz)*$/gi;
+    options.patternIndex = options.patternIndex || /^\/index\-[a-f0-9]{8}\.html(\.gz)*$/gi;
     var tool = options.tool || toolFactory(options);
     var first = true;
 
@@ -19,7 +19,7 @@ module.exports = function(options) {
 
         // Update the default root object once we've found the index.html file
         var filename = file.path.substr(options.dirRoot.length);
-        if (filename.match(options.patternIndex)) {   
+        if (filename.match(options.patternIndex)) {
 
             gutil.log('gulp-cloudfront:', 'Identified index [', filename, ']');
 
