@@ -19,7 +19,7 @@ module.exports = function(options) {
 
         // Update the default root object once we've found the index.html file
         var filename = file.path.substr(options.dirRoot.length);
-        if (filename.match(options.patternIndex)) {   
+        if (filename.match(options.patternIndex)) {
 
             gutil.log('gulp-cloudfront:', 'Identified index [', filename, ']');
 

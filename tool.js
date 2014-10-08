@@ -12,7 +12,7 @@ module.exports = function(options) {
         accessKeyId: options.key,
         secretAccessKey: options.secret
     });
-    
+
     var updateDefaultRootObject = function (defaultRootObject) {
 
         var deferred = Q.defer();
@@ -25,16 +25,16 @@ module.exports = function(options) {
             } else {
 
                 // AWS Service returns errors if we don't fix these
-                if (data.DistributionConfig.Comment == null) data.DistributionConfig.Comment = '';
-                if (data.DistributionConfig.Logging.Enabled == false) {
+                if (data.DistributionConfig.Comment === null) data.DistributionConfig.Comment = '';
+                if (data.DistributionConfig.Logging.Enabled === false) {
                     data.DistributionConfig.Logging.Bucket = '';
                     data.DistributionConfig.Logging.Prefix = '';
                 }
 
                 // Causing problems on a default cloudfront setup, why is this needed?
-                // if (data.DistributionConfig.Origins.Items[0].S3OriginConfig.OriginAccessIdentity === null) {
-                //   data.DistributionConfig.Origins.Items[0].S3OriginConfig.OriginAccessIdentity = '';
-                // }
+                if (data.DistributionConfig.Origins.Items instanceof Array && data.DistributionConfig.Origins.Items[0].S3OriginConfig.OriginAccessIdentity === null) {
+                    data.DistributionConfig.Origins.Items[0].S3OriginConfig.OriginAccessIdentity = '';
+                }
 
                 if (data.DistributionConfig.DefaultRootObject === defaultRootObject.substr(1)) {
                     gutil.log('gulp-cloudfront:', "DefaultRootObject hasn't changed, not updating.");
