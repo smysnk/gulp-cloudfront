@@ -5,7 +5,7 @@ var toolFactory = require('./tool');
 module.exports = function(options) {
 
     options = options || {};
-    options.patternIndex = options.patternIndex || /^\/index\-[a-f0-9]{8}\.html(\.gz)*$/gi;
+    options.patternIndex = options.patternIndex || /^\/index\.[a-f0-9]{8}\.html(\.gz)*$/gi;
     var tool = options.tool || toolFactory(options);
     var first = true;
 
