@@ -19,18 +19,30 @@ module.exports = function (options) {
         var deferred = Q.defer();
 
         var s3 = new AWS.S3({params: {Bucket: options.bucket}});
-        s3.putBucketWebsite({
-            WebsiteConfiguration: {
-                IndexDocument: {
-                    Suffix: indexFile.substr(1)
-                }
-            }
-        }, function (err, data) {
+
+        s3.getBucketWebsite({}, function (err, data) {
             if (err) {
                 deferred.reject(err);
             } else {
-                gutil.log('gulp-s3-index:', 'WebsiteIndex updated to [' + indexFile.substr(1) + '].');
-                deferred.resolve();
+                data.IndexDocument.Suffix = indexFile.substr(1);
+
+                //Remove empty properties
+                Object.keys(data).forEach(function (k) {
+                    if (!data[k] || (Array.isArray(data[k]) && !data[k].length)) {
+                        delete data[k];
+                    }
+                });
+
+                s3.putBucketWebsite({
+                    WebsiteConfiguration: data
+                }, function (err) {
+                    if (err) {
+                        deferred.reject(err);
+                    } else {
+                        gutil.log('gulp-s3-index:', 'WebsiteIndex updated to [' + indexFile.substr(1) + '].');
+                        deferred.resolve();
+                    }
+                });
             }
         });
 
