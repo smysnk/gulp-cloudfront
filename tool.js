@@ -8,57 +8,30 @@ var gutil = require('gulp-util');
 
 module.exports = function(options) {
 
-    var cloudfront = new AWS.CloudFront({
+    AWS.config.region = options.region;
+    var s3 = new AWS.S3({
         accessKeyId: options.key,
         secretAccessKey: options.secret
     });
 
-    var updateDefaultRootObject = function (defaultRootObject) {
+    var updateWebsiteIndex = function (indexFile) {
 
         var deferred = Q.defer();
 
-        // Get the existing distribution id
-        cloudfront.getDistribution({ Id: options.distributionId }, function(err, data) {
 
+        var s3 = new AWS.S3({params: {Bucket: options.bucket}});
+        s3.putBucketWebsite({
+            WebsiteConfiguration: {
+                IndexDocument: {
+                    Suffix: indexFile.substr(1);
+                }
+            }
+        }, function (err, data) {
             if (err) {
                 deferred.reject(err);
             } else {
-
-                // AWS Service returns errors if we don't fix these
-                if (data.DistributionConfig.Comment === null) data.DistributionConfig.Comment = '';
-                if (data.DistributionConfig.Logging.Enabled === false) {
-                    data.DistributionConfig.Logging.Bucket = '';
-                    data.DistributionConfig.Logging.Prefix = '';
-                }
-
-                // Causing problems on a default cloudfront setup, why is this needed?
-                if (data.DistributionConfig.Origins.Items instanceof Array && data.DistributionConfig.Origins.Items[0].S3OriginConfig.OriginAccessIdentity === null) {
-                    data.DistributionConfig.Origins.Items[0].S3OriginConfig.OriginAccessIdentity = '';
-                }
-
-                if (data.DistributionConfig.DefaultRootObject === defaultRootObject.substr(1)) {
-                    gutil.log('gulp-cloudfront:', "DefaultRootObject hasn't changed, not updating.");
-                    return deferred.resolve();
-                }
-
-                // Update the distribution with the new default root object (trim the precedeing slash)
-                data.DistributionConfig.DefaultRootObject = defaultRootObject.substr(1);
-
-                cloudfront.updateDistribution({
-                    IfMatch: data.ETag,
-                    Id: options.distributionId,
-                    DistributionConfig: data.DistributionConfig
-                }, function(err, data) {
-
-                    if (err) {
-                        deferred.reject(err);
-                    } else {
-                        gutil.log('gulp-cloudfront:', 'DefaultRootObject updated to [' + defaultRootObject.substr(1) + '].');
-                        deferred.resolve();
-                    }
-
-                });
-
+                gutil.log('gulp-s3-index:', 'WebsiteIndex updated to [' + indexFile.substr(1) + '].');
+                deferred.resolve();
             }
         });
 
@@ -67,7 +40,7 @@ module.exports = function(options) {
     };
 
     return {
-        updateDefaultRootObject: updateDefaultRootObject
+        updateWebsiteIndex: updateWebsiteIndex
     };
 
 };
