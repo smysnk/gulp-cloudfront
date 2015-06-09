@@ -72,4 +72,4 @@ var aws = {
 
 ## License
 
-[MIT](http://opensource.org/licenses/MIT) © Michiel Westerbeek
+[MIT](http://opensource.org/licenses/MIT)
