@@ -6,7 +6,7 @@ var AWS = require('aws-sdk');
 var Q = require('q');
 var gutil = require('gulp-util');
 
-module.exports = function(options) {
+module.exports = function (options) {
 
     AWS.config.region = options.region;
     var s3 = new AWS.S3({
@@ -18,12 +18,11 @@ module.exports = function(options) {
 
         var deferred = Q.defer();
 
-
         var s3 = new AWS.S3({params: {Bucket: options.bucket}});
         s3.putBucketWebsite({
             WebsiteConfiguration: {
                 IndexDocument: {
-                    Suffix: indexFile.substr(1);
+                    Suffix: indexFile.substr(1)
                 }
             }
         }, function (err, data) {

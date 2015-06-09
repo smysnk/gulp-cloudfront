@@ -1,32 +1,22 @@
-# [gulp](https://github.com/wearefractal/gulp)-cloudfront [![Build Status](https://travis-ci.org/smysnk/gulp-cloudfront.png?branch=master)](https://travis-ci.org/smysnk/gulp-cloudfront)
+# [gulp](https://github.com/wearefractal/gulp)-s3-index [![Build Status](https://travis-ci.org/happylinks/gulp-s3-index.png?branch=master)](https://travis-ci.org/happylinks/gulp-s3-index)
 
-> Updates the Default Root Object of a CloudFront distribution
+> Updates the Website Index of a S3 Bucket
 
 ## Purpose
 
-Content distribution networks like [CloudFront](http://aws.amazon.com/cloudfront/) let you cache static assets in [Edge Locations](http://aws.amazon.com/about-aws/globalinfrastructure/) for extended periods of time.
-A problem occurs however when you go to release a new version of your website, you will have to explictly tell CloudFront to expire each file or you will have to wait for the [TTL to expire](http://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Expiration.html).
-In the case of CloudFront, you will need to invalidate items or wait for the cache TTL to expire before vistors of your website will see the vew version.
-
-A solution to this problem is adding a revisioned suffix to the filename for each static asset.  The gulp plugin [gulp-rev-all](https://github.com/smysnk/gulp-rev-all) can assist in this process.  eg. unicorn.css => unicorn-098f6bcd.css
-You can then use [gulp-s3](https://github.com/nkostelnik/gulp-s3) to upload the revisioned files to a S3 bucket which CloudFront points to.
-
-**Finally gulp-cloudfront comes in during the final step, to update a CloudFront distributions' [Default Root Object](http://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/DefaultRootObject.html) to the latest revisioned index.html.**  
-Updating the Default Root Object only takes 5-10 minutes and all new visitors to your website will no longer see the old cached content.
-A much better solution than waiting for cached items to expire or invalidating individual files which costs $$. 
-
-You can in essence host multiple versions of your website under the same static host and if you need to revert to an older version you need only change the index.html file.
+Amazon S3 let's you use buckets as a Static Website Host. This allows you to visit your bucket as if it were a normal website.
+In the release process with gulp-awspublish and gulp-rev-all the index document has a hash. This plugin makes it possible to update the index document from your bucket, like [gulp-cloudfront](https://github.com/smysnk/gulp-cloudfront) does it for cloudfront.
 
 ## Under the Hood
 
-This plugin will identify the index.html file based on the default or configured pattern.  Once identified it will update the CloudFront distribution to the new index file.
+This plugin will identify the index.html file based on the default or configured pattern.  Once identified it will update the S3 bucket with the new index file.
 
 ## Install
 
 Install with [npm](https://npmjs.org)
 
 ```
-npm install --save-dev gulp-cloudfront
+npm install --save-dev gulp-s3-index
 ```
 
 ## Example
@@ -35,14 +25,13 @@ npm install --save-dev gulp-cloudfront
 var gulp = require('gulp');
 var revall = require('gulp-rev-all');
 var awspublish = require('gulp-awspublish');
-var cloudfront = require("gulp-cloudfront");
+var s3_index = require("gulp-s3-index");
 
 var aws = {
     "key": "AKIAI3Z7CUAFHG53DMJA",
     "secret": "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",
     "bucket": "bucket-name",
-    "region": "us-standard",
-    "distributionId": "E1SYAKGEMSK3OD"
+    "region": "us-standard"
 };
 
 var publisher = awspublish.create(aws);
@@ -55,7 +44,7 @@ gulp.task('default', function () {
         .pipe(publisher.publish(headers))
         .pipe(publisher.cache())
         .pipe(awspublish.reporter())
-        .pipe(cloudfront(aws));
+        .pipe(s3_index(aws));
 });
 ```
 
@@ -69,7 +58,7 @@ gulp.task('default', function () {
 Type: `Regular Expression`
 Default: `/^\/index\.[a-f0-9]{8}\.html(\.gz)*$/gi`
 
-Specify the pattern used to match the default root object
+Specify the pattern used to match the default index file
 
 ```js
 
@@ -83,4 +72,4 @@ var aws = {
 
 ## License
 
-[MIT](http://opensource.org/licenses/MIT) © [Joshua Bellamy-Henn](http://www.psidox.com)
+[MIT](http://opensource.org/licenses/MIT) © Michiel Westerbeek
