@@ -1,4 +1,4 @@
-var cloundfront = require("./index");
+var s3_index = require("./index");
 var toolFactory = require("./tool");
 var should = require("should");
 var gulp = require("gulp");
@@ -14,10 +14,10 @@ var sinon = require("sinon");
 
 require("mocha");
 
-describe("gulp-cloudfront", function () {
+describe("gulp-s3-index", function () {
 
     var stream;
-    var writeFile = function(globPath) {
+    var writeFile = function (globPath) {
         //write all files to stream
         glob(globPath + "/**/*.*", {}, function (er, fileNames) {
             fileNames.forEach(function (fileName) {
@@ -32,7 +32,7 @@ describe("gulp-cloudfront", function () {
         });
     }
 
-    it("should identify default index pattern", function(done) {
+    it("should identify default index pattern", function (done) {
 
         var dirRoot = 'test/fixtures/config1';
         var callback = sinon.mock().withArgs('/index.abcd1234.html').once().returns({
@@ -40,12 +40,12 @@ describe("gulp-cloudfront", function () {
                 success();
             }
         });
-        
+
         var tool = {
-            updateDefaultRootObject: callback
+            updateWebsiteIndex: callback
         };
 
-        stream = cloundfront({ 
+        stream = s3_index({
             tool: tool
         });
         stream.on('data', function (file) {});
@@ -58,8 +58,7 @@ describe("gulp-cloudfront", function () {
 
     });
 
-
-    it("should identify default index pattern gzipped", function(done) {
+    it("should identify default index pattern gzipped", function (done) {
 
         var dirRoot = 'test/fixtures/gzip';
         var callback = sinon.mock().withArgs('/index.abcd1234.html').once().returns({
@@ -67,12 +66,12 @@ describe("gulp-cloudfront", function () {
                 success();
             }
         });
-        
+
         var tool = {
-            updateDefaultRootObject: callback
+            updateWebsiteIndex: callback
         };
 
-        stream = cloundfront({ 
+        stream = s3_index({
             tool: tool
         });
         stream.on('data', function (file) {});
@@ -85,7 +84,7 @@ describe("gulp-cloudfront", function () {
 
     });
 
-    it("should identify custom pattern", function(done) {
+    it("should identify custom pattern", function (done) {
 
         var dirRoot = 'test/fixtures/config1';
         var callback = sinon.mock().withArgs('/custom.a1b2.html').once().returns({
@@ -93,16 +92,16 @@ describe("gulp-cloudfront", function () {
                 success();
             }
         });
-        
+
         var tool = {
-            updateDefaultRootObject: callback
+            updateWebsiteIndex: callback
         };
 
-        stream = cloundfront({
+        stream = s3_index({
             patternIndex: /^\/custom\.[a-f0-9]{4}\.html$/gi,
             tool: tool
         });
-        stream.on('data', function (file) {});        
+        stream.on('data', function (file) {});
         stream.on('end', function () {
             callback.verify();
             done();
@@ -110,7 +109,5 @@ describe("gulp-cloudfront", function () {
 
         writeFile(dirRoot);
     });
-
-
 
 });
