@@ -21,9 +21,6 @@ module.exports = function (options) {
 
         var deferred = Q.defer();
 	
-	// this killed everything.. missing credentials.
-        //var s3 = new AWS.S3({params: {Bucket: options.bucket}});
-
         s3.getBucketWebsite({}, function (err, data) {
             if (err) {
                 deferred.reject(err);
