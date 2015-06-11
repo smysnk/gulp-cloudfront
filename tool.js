@@ -6,59 +6,47 @@ var AWS = require('aws-sdk');
 var Q = require('q');
 var gutil = require('gulp-util');
 
-module.exports = function(options) {
+module.exports = function (options) {
 
-    var cloudfront = new AWS.CloudFront({
-        accessKeyId: options.key,
-        secretAccessKey: options.secret
+    AWS.config.region = options.region;
+    var s3 = new AWS.S3({
+	params: {
+		Bucket: options.params.bucket
+	}
+        accessKeyId: options.accesKeyId,
+        secretAccessKey: options.secretAccesKeyId
     });
 
-    var updateDefaultRootObject = function (defaultRootObject) {
+    var updateWebsiteIndex = function (indexFile) {
 
         var deferred = Q.defer();
+	
+	// this killed everything.. missing credentials.
+        //var s3 = new AWS.S3({params: {Bucket: options.bucket}});
 
-        // Get the existing distribution id
-        cloudfront.getDistribution({ Id: options.distributionId }, function(err, data) {
-
+        s3.getBucketWebsite({}, function (err, data) {
             if (err) {
                 deferred.reject(err);
             } else {
+                data.IndexDocument.Suffix = indexFile.substr(1);
 
-                // AWS Service returns errors if we don't fix these
-                if (data.DistributionConfig.Comment === null) data.DistributionConfig.Comment = '';
-                if (data.DistributionConfig.Logging.Enabled === false) {
-                    data.DistributionConfig.Logging.Bucket = '';
-                    data.DistributionConfig.Logging.Prefix = '';
-                }
+                //Remove empty properties
+                Object.keys(data).forEach(function (k) {
+                    if (!data[k] || (Array.isArray(data[k]) && !data[k].length)) {
+                        delete data[k];
+                    }
+                });
 
-                // Causing problems on a default cloudfront setup, why is this needed?
-                if (data.DistributionConfig.Origins.Items instanceof Array && data.DistributionConfig.Origins.Items[0].S3OriginConfig.OriginAccessIdentity === null) {
-                    data.DistributionConfig.Origins.Items[0].S3OriginConfig.OriginAccessIdentity = '';
-                }
-
-                if (data.DistributionConfig.DefaultRootObject === defaultRootObject.substr(1)) {
-                    gutil.log('gulp-cloudfront:', "DefaultRootObject hasn't changed, not updating.");
-                    return deferred.resolve();
-                }
-
-                // Update the distribution with the new default root object (trim the precedeing slash)
-                data.DistributionConfig.DefaultRootObject = defaultRootObject.substr(1);
-
-                cloudfront.updateDistribution({
-                    IfMatch: data.ETag,
-                    Id: options.distributionId,
-                    DistributionConfig: data.DistributionConfig
-                }, function(err, data) {
-
+                s3.putBucketWebsite({
+                    WebsiteConfiguration: data
+                }, function (err) {
                     if (err) {
                         deferred.reject(err);
                     } else {
-                        gutil.log('gulp-cloudfront:', 'DefaultRootObject updated to [' + defaultRootObject.substr(1) + '].');
+                        gutil.log('gulp-s3-index:', 'WebsiteIndex updated to [' + indexFile.substr(1) + '].');
                         deferred.resolve();
                     }
-
                 });
-
             }
         });
 
@@ -67,7 +55,7 @@ module.exports = function(options) {
     };
 
     return {
-        updateDefaultRootObject: updateDefaultRootObject
+        updateWebsiteIndex: updateWebsiteIndex
     };
 
 };

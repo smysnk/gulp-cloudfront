@@ -13,7 +13,7 @@ module.exports = function(options) {
 
         if (first) {
             options.dirRoot = options.dirRoot || file.base.replace(/\/$/, "");
-            gutil.log('gulp-cloudfront:', 'Root directory [', options.dirRoot, ']');
+            gutil.log('gulp-s3-index:', 'Root directory [', options.dirRoot, ']');
             first = !first;
         }
 
@@ -21,18 +21,18 @@ module.exports = function(options) {
         var filename = file.path.substr(options.dirRoot.length);
         if (filename.match(options.patternIndex)) {
 
-            gutil.log('gulp-cloudfront:', 'Identified index [', filename, ']');
+            gutil.log('gulp-s3-index:', 'Identified index [', filename, ']');
 
             // Trim the '.gz' if gzipped
             if (filename.substr(filename.length - 3) === '.gz') {
                 filename = filename.substr(0, filename.length - 3);
             }
 
-            tool.updateDefaultRootObject(filename)
+            tool.updateWebsiteIndex(filename)
                 .then(function() {
                     return callback(null, file);
                 }, function(err) {
-                    gutil.log(new gutil.PluginError('gulp-cloudfront', err));
+                    gutil.log(new gutil.PluginError('gulp-s3-index', err));
                     callback(null, file);
 
                 });

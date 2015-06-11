@@ -1,6 +1,6 @@
 {
-  "name": "gulp-cloudfront",
-  "version": "0.0.14",
+  "name": "gulp-s3-index",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "dependencies": {
@@ -27,19 +27,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/smysnk/gulp-cloudfront.git"
+    "url": "git://github.com/happylinks/gulp-s3-index.git"
   },
   "keywords": [
     "gulpplugin",
     "aws",
-    "cloudfront",
-    "cdn"
+    "s3"
   ],
-  "homepage": "https://github.com/smysnk/gulp-cloudfront",
-  "author": "Joshua Bellamy-Henn <smysnk@gmail.com>",
+  "homepage": "https://github.com/happylinks/gulp-s3-index",
+  "author": "Michiel Westerbeek <happylinks@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/smysnk/gulp-rev-all/issues"
+    "url": "https://github.com/happylinks/gulp-s3-index/issues"
   },
   "engines": {
     "node": ">=0.8"
