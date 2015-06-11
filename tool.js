@@ -12,7 +12,7 @@ module.exports = function (options) {
     var s3 = new AWS.S3({
 	params: {
 		Bucket: options.params.bucket
-	}
+	},
         accessKeyId: options.accesKeyId,
         secretAccessKey: options.secretAccesKeyId
     });
