@@ -10,16 +10,17 @@ module.exports = function (options) {
 
     AWS.config.region = options.region;
     var s3 = new AWS.S3({
-        accessKeyId: options.key,
-        secretAccessKey: options.secret
+	params: {
+		Bucket: options.params.bucket
+	},
+        accessKeyId: options.accesKeyId,
+        secretAccessKey: options.secretAccesKeyId
     });
 
     var updateWebsiteIndex = function (indexFile) {
 
         var deferred = Q.defer();
-
-        var s3 = new AWS.S3({params: {Bucket: options.bucket}});
-
+	
         s3.getBucketWebsite({}, function (err, data) {
             if (err) {
                 deferred.reject(err);
