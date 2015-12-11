@@ -10,7 +10,8 @@ module.exports = function(options) {
 
     var cloudfront = new AWS.CloudFront({
         accessKeyId: options.key,
-        secretAccessKey: options.secret
+        secretAccessKey: options.secret,
+        sessionToken: options.sessionToken
     });
 
     var updateDefaultRootObject = function (defaultRootObject) {
