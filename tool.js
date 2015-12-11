@@ -45,6 +45,15 @@ module.exports = function(options) {
                 // Update the distribution with the new default root object (trim the precedeing slash)
                 data.DistributionConfig.DefaultRootObject = defaultRootObject.substr(1);
 
+                // Update the 404 error to point at the defaultRootObject 
+                // This is really only required for SPA apps - but since this is our branch!
+                data.DistributionConfig.CustomErrorResponses.Items.forEach(function(item) {
+                    if (item.ErrorCode === 404) {
+                        item.ResponsePagePath = defaultRootObject;
+                    }
+                });
+
+
                 cloudfront.updateDistribution({
                     IfMatch: data.ETag,
                     Id: options.distributionId,
