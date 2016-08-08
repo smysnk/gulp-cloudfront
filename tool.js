@@ -23,6 +23,10 @@ module.exports = function(options) {
             if (err) {
                 deferred.reject(err);
             } else {
+                // trim the precedeing slash
+                if ( '/' == defaultRootObject.charAt( 0 ) ) {
+                    defaultRootObject = defaultRootObject.substr(1);
+                }
 
                 // AWS Service returns errors if we don't fix these
                 if (data.DistributionConfig.Comment === null) data.DistributionConfig.Comment = '';
@@ -36,13 +40,13 @@ module.exports = function(options) {
                     data.DistributionConfig.Origins.Items[0].S3OriginConfig.OriginAccessIdentity = '';
                 }
 
-                if (data.DistributionConfig.DefaultRootObject === defaultRootObject.substr(1)) {
+                if (data.DistributionConfig.DefaultRootObject === defaultRootObject) {
                     gutil.log('gulp-cloudfront:', "DefaultRootObject hasn't changed, not updating.");
                     return deferred.resolve();
                 }
 
                 // Update the distribution with the new default root object (trim the precedeing slash)
-                data.DistributionConfig.DefaultRootObject = defaultRootObject.substr(1);
+                data.DistributionConfig.DefaultRootObject = defaultRootObject;
 
                 cloudfront.updateDistribution({
                     IfMatch: data.ETag,
@@ -53,7 +57,7 @@ module.exports = function(options) {
                     if (err) {
                         deferred.reject(err);
                     } else {
-                        gutil.log('gulp-cloudfront:', 'DefaultRootObject updated to [' + defaultRootObject.substr(1) + '].');
+                        gutil.log('gulp-cloudfront:', 'DefaultRootObject updated to [' + defaultRootObject + '].');
                         deferred.resolve();
                     }
 
