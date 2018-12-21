@@ -13,6 +13,10 @@ module.exports = function(options) {
         secretAccessKey: options.secret
     });
 
+    if (options.pushstate === true) {
+        options.pushstate = [403, 404];
+    }
+
     var updateDefaultRootObject = function (defaultRootObject) {
 
         var deferred = Q.defer();
@@ -43,6 +47,16 @@ module.exports = function(options) {
 
                 // Update the distribution with the new default root object (trim the precedeing slash)
                 data.DistributionConfig.DefaultRootObject = defaultRootObject.substr(1);
+
+                var errors = data.DistributionConfig.CustomErrorResponses;
+                if (errors && errors.length && options.pushstate) {
+                    for (var i = 0; i < errors.Quantity; i++) {
+                        var error = errors.Items[i];
+                        if (options.pushstate.indexOf(error.ErrorCode) >= 0) {
+                            error.ResponsePagePath = '/' + data.DistributionConfig.DefaultRootObject;
+                        }
+                    }
+                }
 
                 cloudfront.updateDistribution({
                     IfMatch: data.ETag,
