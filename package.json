@@ -4,17 +4,17 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "aws-sdk": "^2.361.0",
+    "event-stream": "~3.1.0",
     "glob": "~3.2.9",
     "gulp": "~3.5.5",
     "gulp-jshint": "~1.5.1",
     "gulp-mocha": "~0.4.1",
     "gulp-util": "~2.2.0",
     "mocha": "~1.13.0",
+    "q": "~1.0.1",
     "should": "*",
-    "event-stream": "~3.1.0",
-    "through2": "~0.4.0",
-    "aws-sdk": "~2.0.0-rc11",
-    "q": "~1.0.1"
+    "through2": "~0.4.0"
   },
   "devDependencies": {
     "gulp": "~3.5.5",
