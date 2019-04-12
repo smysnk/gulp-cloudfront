@@ -38,6 +38,7 @@ module.exports = function(options) {
                 });
 
         } else {
+            gutil.log('gulp-cloudfront:', 'no index file identified in root directory [', options.dirRoot, ']');
             return callback(null, file);
         }
 
