@@ -49,8 +49,9 @@ var publisher = awspublish.create(aws);
 var headers = {'Cache-Control': 'max-age=315360000, no-transform, public'};
 
 gulp.task('default', function () {
+    var revAll = new revall();
     gulp.src('dist/**')
-        .pipe(revall())
+        .pipe(revAll.revision())
         .pipe(awspublish.gzip())
         .pipe(publisher.publish(headers))
         .pipe(publisher.cache())
