@@ -1,86 +1,105 @@
-# [gulp](https://github.com/wearefractal/gulp)-cloudfront [![Build Status](https://travis-ci.org/smysnk/gulp-cloudfront.png?branch=master)](https://travis-ci.org/smysnk/gulp-cloudfront)
+# gulp-cloudfront
 
-> Updates the Default Root Object of a CloudFront distribution
+> Updates the Default Root Object of an AWS CloudFront distribution
 
 ## Purpose
 
-Content distribution networks like [CloudFront](http://aws.amazon.com/cloudfront/) let you cache static assets in [Edge Locations](http://aws.amazon.com/about-aws/globalinfrastructure/) for extended periods of time.
-A problem occurs however when you go to release a new version of your website, you will have to explictly tell CloudFront to expire each file or you will have to wait for the [TTL to expire](http://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Expiration.html).
-In the case of CloudFront, you will need to invalidate items or wait for the cache TTL to expire before vistors of your website will see the vew version.
+CloudFront lets you cache static assets for long periods, which is great for immutable build output and less great for `index.html` when you deploy a new version of a site.
 
-A solution to this problem is adding a revisioned suffix to the filename for each static asset.  The gulp plugin [gulp-rev-all](https://github.com/smysnk/gulp-rev-all) can assist in this process.  eg. unicorn.css => unicorn-098f6bcd.css
-You can then use [gulp-s3](https://github.com/nkostelnik/gulp-s3) to upload the revisioned files to a S3 bucket which CloudFront points to.
+One way to avoid broad cache invalidations is to publish revisioned assets, upload them to S3, and then point CloudFront's default root object at the latest revisioned HTML entrypoint. `gulp-cloudfront` handles that last step by finding the revisioned index file in your Gulp stream and updating the distribution.
 
-**Finally gulp-cloudfront comes in during the final step, to update a CloudFront distributions' [Default Root Object](http://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/DefaultRootObject.html) to the latest revisioned index.html.**  
-Updating the Default Root Object only takes 5-10 minutes and all new visitors to your website will no longer see the old cached content.
-A much better solution than waiting for cached items to expire or invalidating individual files which costs $$. 
-
-You can in essence host multiple versions of your website under the same static host and if you need to revert to an older version you need only change the index.html file.
-
-## Under the Hood
-
-This plugin will identify the index.html file based on the default or configured pattern.  Once identified it will update the CloudFront distribution to the new index file.
+This pairs well with [`gulp-rev-all`](https://github.com/smysnk/gulp-rev-all) and an S3 publishing step such as [`gulp-awspublish`](https://www.npmjs.com/package/gulp-awspublish).
 
 ## Install
 
-Install with [npm](https://npmjs.org)
-
-```
+```sh
 npm install --save-dev gulp-cloudfront
 ```
+
+`gulp-cloudfront` currently supports Node.js 18.18 or newer.
+The published package includes TypeScript declaration files.
 
 ## Example
 
 ```js
-var gulp = require('gulp');
-var revall = require('gulp-rev-all');
-var awspublish = require('gulp-awspublish');
-var cloudfront = require("gulp-cloudfront");
+const gulp = require("gulp");
+const revall = require("gulp-rev-all");
+const awspublish = require("gulp-awspublish");
+const cloudfront = require("gulp-cloudfront");
 
-var aws = {
-    "key": "AKIAI3Z7CUAFHG53DMJA",
-    "secret": "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",
-    "bucket": "bucket-name",
-    "region": "us-standard",
-    "distributionId": "E1SYAKGEMSK3OD"
+const aws = {
+  distributionId: process.env.CLOUDFRONT_DISTRIBUTION_ID,
+  region: "us-east-1",
 };
 
-var publisher = awspublish.create(aws);
-var headers = {'Cache-Control': 'max-age=315360000, no-transform, public'};
+function deploy() {
+  const publisher = awspublish.create({
+    region: process.env.AWS_REGION || "us-east-1",
+  });
+  const headers = {
+    "Cache-Control": "max-age=315360000, no-transform, public",
+  };
 
-gulp.task('default', function () {
-    gulp.src('dist/**')
-        .pipe(revall())
-        .pipe(awspublish.gzip())
-        .pipe(publisher.publish(headers))
-        .pipe(publisher.cache())
-        .pipe(awspublish.reporter())
-        .pipe(cloudfront(aws));
-});
+  return gulp
+    .src("dist/**", { base: "dist" })
+    .pipe(revall.revision())
+    .pipe(awspublish.gzip())
+    .pipe(publisher.publish(headers))
+    .pipe(publisher.cache())
+    .pipe(awspublish.reporter())
+    .pipe(cloudfront(aws));
+}
+
+exports.default = deploy;
 ```
 
-  * See [gulp-awspublish](https://www.npmjs.org/package/gulp-awspublish), [gulp-rev-all](https://www.npmjs.org/package/gulp-rev-all)
+## Options
 
+### `distributionId`
 
-## API
+Type: `string`
 
-#### options.patternIndex
+Required. The CloudFront distribution to update.
 
-Type: `Regular Expression`
-Default: `/^\/index\.[a-f0-9]{8}\.html(\.gz)*$/gi`
+### `patternIndex`
 
-Specify the pattern used to match the default root object
+Type: `RegExp`
+Default: `/^\/index\.[a-f0-9]{8}\.html(?:\.gz)?$/i`
+
+Overrides the pattern used to identify the HTML file that should become the default root object.
 
 ```js
-
-var aws = {
-    ..,
-    "patternIndex": /^\/root\-[a-f0-9]{4}\.html(\.gz)*$/gi
+const aws = {
+  distributionId: process.env.CLOUDFRONT_DISTRIBUTION_ID,
+  patternIndex: /^\/root\-[a-f0-9]{4}\.html(?:\.gz)?$/i,
 };
-
 ```
 
+### `region`
+
+Type: `string`
+Default: `"us-east-1"`
+
+AWS region used to configure the SDK client. CloudFront is a global service, but the AWS SDK still requires a region for client resolution.
+
+### Credentials
+
+If you do not pass explicit credentials, the AWS SDK v3 default credential chain is used.
+
+You can also pass:
+
+- `accessKeyId`
+- `secretAccessKey`
+- `key`
+- `secret`
+- `sessionToken`
+- `credentials`
+
+## Notes
+
+- The plugin trims a trailing `.gz` suffix before updating `DefaultRootObject`.
+- Update failures are logged and the Vinyl stream continues, matching the historical plugin behavior.
 
 ## License
 
-[MIT](http://opensource.org/licenses/MIT) © [Joshua Bellamy-Henn](http://www.psidox.com)
+[MIT](https://opensource.org/licenses/MIT) © [Joshua Bellamy](https://smysnk.com)

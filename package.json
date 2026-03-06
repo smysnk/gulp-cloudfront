@@ -1,33 +1,56 @@
 {
   "name": "gulp-cloudfront",
-  "version": "0.0.14",
-  "description": "",
-  "main": "index.js",
+  "version": "1.0.0",
+  "description": "Updates the Default Root Object of an AWS CloudFront distribution",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./tool": {
+      "types": "./dist/tool.d.ts",
+      "require": "./dist/tool.js",
+      "default": "./dist/tool.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "dependencies": {
-    "aws-sdk": "^2.361.0",
-    "event-stream": "~3.1.0",
-    "glob": "~3.2.9",
-    "gulp": "~3.5.5",
-    "gulp-jshint": "~1.5.1",
-    "gulp-mocha": "~0.4.1",
-    "gulp-util": "~2.2.0",
-    "mocha": "~1.13.0",
-    "q": "~1.0.1",
-    "should": "*",
-    "through2": "~0.4.0"
+    "@aws-sdk/client-cloudfront": "^3.1003.0",
+    "fancy-log": "^2.0.0",
+    "plugin-error": "^2.0.1",
+    "through2": "^4.0.2"
   },
   "devDependencies": {
-    "gulp": "~3.5.5",
-    "mocha": "~1.13.0",
-    "should": "*",
-    "sinon": "~1.10.2"
+    "@types/fancy-log": "^2.0.2",
+    "@types/node": "^24.5.2",
+    "@types/through2": "^2.0.41",
+    "gulp": "^5.0.1",
+    "mocha": "^11.7.5",
+    "sinon": "^21.0.2",
+    "typescript": "^5.9.2"
   },
   "scripts": {
+    "prebuild": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
+    "build": "tsc -p tsconfig.json",
+    "prepack": "npm run build",
+    "pretest": "npm run build",
     "test": "mocha test.js"
+  },
+  "overrides": {
+    "mocha": {
+      "diff": "^8.0.3",
+      "serialize-javascript": "^7.0.0"
+    }
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/smysnk/gulp-cloudfront.git"
+    "url": "https://github.com/smysnk/gulp-cloudfront.git"
   },
   "keywords": [
     "gulpplugin",
@@ -36,12 +59,12 @@
     "cdn"
   ],
   "homepage": "https://github.com/smysnk/gulp-cloudfront",
-  "author": "Joshua Bellamy-Henn <smysnk@gmail.com>",
+  "author": "Joshua Bellamy <github@smysnk.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/smysnk/gulp-rev-all/issues"
+    "url": "https://github.com/smysnk/gulp-cloudfront/issues"
   },
   "engines": {
-    "node": ">=0.8"
+    "node": ">=18.18"
   }
 }
