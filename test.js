@@ -11,6 +11,35 @@ const {
 const cloudfront = require("./dist");
 const createTool = require("./dist/tool");
 
+function withStubbedFancyLog(stub) {
+  const fancyLogPath = require.resolve("fancy-log");
+  const cloudfrontPath = require.resolve("./dist");
+  const originalFancyLogModule = require.cache[fancyLogPath];
+  const originalCloudfrontModule = require.cache[cloudfrontPath];
+
+  require.cache[fancyLogPath] = {
+    ...originalFancyLogModule,
+    exports: stub,
+  };
+  delete require.cache[cloudfrontPath];
+
+  try {
+    return require("./dist");
+  } finally {
+    if (originalFancyLogModule) {
+      require.cache[fancyLogPath] = originalFancyLogModule;
+    } else {
+      delete require.cache[fancyLogPath];
+    }
+
+    if (originalCloudfrontModule) {
+      require.cache[cloudfrontPath] = originalCloudfrontModule;
+    } else {
+      delete require.cache[cloudfrontPath];
+    }
+  }
+}
+
 function collectStream(stream) {
   return new Promise((resolve, reject) => {
     const files = [];
@@ -102,13 +131,18 @@ describe("gulp-cloudfront", function () {
 
     it("logs update errors and continues streaming files", async function () {
       const updateDefaultRootObject = sinon.stub().rejects(new Error("boom"));
+      const logStub = sinon.stub();
+      const cloudfrontWithStubbedLog = withStubbedFancyLog(logStub);
 
-      const files = await runFixturePipeline("test/fixtures/config1", {
-        tool: { updateDefaultRootObject },
-      });
+      const files = await collectStream(
+        gulp
+          .src(["test/fixtures/config1/**/*.*"], { cwd: __dirname, nodir: true })
+          .pipe(cloudfrontWithStubbedLog({ tool: { updateDefaultRootObject } })),
+      );
 
       assert.ok(files.length > 0);
       sinon.assert.calledOnce(updateDefaultRootObject);
+      sinon.assert.called(logStub);
     });
   });
 
