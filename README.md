@@ -1,4 +1,4 @@
-# gulp-cloudfront [![Tests](https://github.com/smysnk/gulp-cloudfront/actions/workflows/ci.yml/badge.svg)](https://github.com/smysnk/gulp-cloudfront/actions/workflows/ci.yml)
+# gulp-cloudfront [![npm version](https://img.shields.io/npm/v/gulp-cloudfront.svg)](https://www.npmjs.com/package/gulp-cloudfront) [![Tests](https://github.com/smysnk/gulp-cloudfront/actions/workflows/ci.yml/badge.svg)](https://github.com/smysnk/gulp-cloudfront/actions/workflows/ci.yml)
 
 > Updates the Default Root Object of an AWS CloudFront distribution
 
