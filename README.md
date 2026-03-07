@@ -22,17 +22,17 @@ The published package includes TypeScript declaration files.
 ## Example
 
 ```js
-const gulp = require("gulp");
-const revall = require("gulp-rev-all");
-const awspublish = require("gulp-awspublish");
-const cloudfront = require("gulp-cloudfront");
+import gulp from "gulp";
+import RevAll from "gulp-rev-all";
+import awspublish from "gulp-awspublish";
+import cloudfront from "gulp-cloudfront";
 
 const aws = {
   distributionId: process.env.CLOUDFRONT_DISTRIBUTION_ID,
   region: "us-east-1",
 };
 
-function deploy() {
+export function deploy() {
   const publisher = awspublish.create({
     region: process.env.AWS_REGION || "us-east-1",
   });
@@ -42,15 +42,13 @@ function deploy() {
 
   return gulp
     .src("dist/**", { base: "dist" })
-    .pipe(revall.revision())
+    .pipe(RevAll.revision())
     .pipe(awspublish.gzip())
     .pipe(publisher.publish(headers))
     .pipe(publisher.cache())
     .pipe(awspublish.reporter())
     .pipe(cloudfront(aws));
 }
-
-exports.default = deploy;
 ```
 
 ## Options
