@@ -53,6 +53,20 @@ function createClient(options: CloudfrontToolOptions): CloudFrontClientLike {
   return new CloudFrontClient(clientOptions);
 }
 
+function normalizePushstateErrorCodes(
+  pushstate: CloudfrontToolOptions["pushstate"],
+): number[] {
+  if (pushstate === true) {
+    return [403, 404];
+  }
+
+  if (Array.isArray(pushstate)) {
+    return pushstate;
+  }
+
+  return [];
+}
+
 function normalizeDistributionConfig(
   distributionConfig: DistributionConfig,
 ): DistributionConfig {
@@ -77,6 +91,30 @@ function normalizeDistributionConfig(
   }
 
   return normalized;
+}
+
+function applyPushstateResponsePages(
+  distributionConfig: DistributionConfig,
+  defaultRootObject: string,
+  pushstateErrorCodes: number[],
+): void {
+  if (!pushstateErrorCodes.length) {
+    return;
+  }
+
+  const customErrorResponses = distributionConfig.CustomErrorResponses;
+  if (!customErrorResponses?.Items?.length) {
+    return;
+  }
+
+  for (const errorResponse of customErrorResponses.Items) {
+    if (
+      typeof errorResponse.ErrorCode === "number" &&
+      pushstateErrorCodes.includes(errorResponse.ErrorCode)
+    ) {
+      errorResponse.ResponsePagePath = `/${defaultRootObject}`;
+    }
+  }
 }
 
 function assertGetDistributionResponse(
@@ -111,6 +149,7 @@ function createTool(options?: CloudfrontToolOptions): CloudfrontTool {
 
   const toolOptions = options;
   const client = createClient(toolOptions);
+  const pushstateErrorCodes = normalizePushstateErrorCodes(toolOptions.pushstate);
 
   async function updateDefaultRootObject(
     defaultRootObject: string,
@@ -135,6 +174,11 @@ function createTool(options?: CloudfrontToolOptions): CloudfrontTool {
     }
 
     distributionConfig.DefaultRootObject = rootObject;
+    applyPushstateResponsePages(
+      distributionConfig,
+      rootObject,
+      pushstateErrorCodes,
+    );
 
     await client.send(
       new UpdateDistributionCommand({

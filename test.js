@@ -211,5 +211,79 @@ describe("gulp-cloudfront", function () {
         "",
       );
     });
+
+    it("updates 403 and 404 error responses when pushstate is enabled", async function () {
+      const client = {
+        send: sinon.stub(),
+      };
+
+      client.send.onFirstCall().resolves({
+        ETag: "etag-1",
+        DistributionConfig: createDistributionConfig({
+          CustomErrorResponses: {
+            Quantity: 3,
+            Items: [
+              { ErrorCode: 403, ResponsePagePath: "/errors/403.html" },
+              { ErrorCode: 404, ResponsePagePath: "/errors/404.html" },
+              { ErrorCode: 500, ResponsePagePath: "/errors/500.html" },
+            ],
+          },
+        }),
+      });
+      client.send.onSecondCall().resolves({});
+
+      const tool = createTool({
+        distributionId: "DIST_ID",
+        pushstate: true,
+        client,
+      });
+
+      await tool.updateDefaultRootObject("/index.abcd1234.html");
+
+      const updateDistributionCommand = client.send.secondCall.args[0];
+      const errorResponses =
+        updateDistributionCommand.input.DistributionConfig.CustomErrorResponses
+          .Items;
+
+      assert.equal(errorResponses[0].ResponsePagePath, "/index.abcd1234.html");
+      assert.equal(errorResponses[1].ResponsePagePath, "/index.abcd1234.html");
+      assert.equal(errorResponses[2].ResponsePagePath, "/errors/500.html");
+    });
+
+    it("updates only configured error responses when pushstate is a custom list", async function () {
+      const client = {
+        send: sinon.stub(),
+      };
+
+      client.send.onFirstCall().resolves({
+        ETag: "etag-1",
+        DistributionConfig: createDistributionConfig({
+          CustomErrorResponses: {
+            Quantity: 2,
+            Items: [
+              { ErrorCode: 403, ResponsePagePath: "/errors/403.html" },
+              { ErrorCode: 404, ResponsePagePath: "/errors/404.html" },
+            ],
+          },
+        }),
+      });
+      client.send.onSecondCall().resolves({});
+
+      const tool = createTool({
+        distributionId: "DIST_ID",
+        pushstate: [404],
+        client,
+      });
+
+      await tool.updateDefaultRootObject("/index.abcd1234.html");
+
+      const updateDistributionCommand = client.send.secondCall.args[0];
+      const errorResponses =
+        updateDistributionCommand.input.DistributionConfig.CustomErrorResponses
+          .Items;
+
+      assert.equal(errorResponses[0].ResponsePagePath, "/errors/403.html");
+      assert.equal(errorResponses[1].ResponsePagePath, "/index.abcd1234.html");
+    });
   });
 });

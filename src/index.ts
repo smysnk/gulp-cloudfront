@@ -44,6 +44,7 @@ function resolveToolOptions(options: CloudfrontOptions): CloudfrontToolOptions {
     key: options.key,
     secret: options.secret,
     sessionToken: options.sessionToken,
+    pushstate: options.pushstate,
     client: options.client,
   };
 }

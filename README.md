@@ -95,6 +95,17 @@ You can also pass:
 - `sessionToken`
 - `credentials`
 
+### `pushstate`
+
+Type: `boolean | number[]`
+Default: `false`
+
+Rewrites matching CloudFront custom error responses to the newly published root
+object, which is useful for HTML5 pushstate routing.
+
+Pass `true` to update both `403` and `404`, or pass a list such as `[404]` to
+target specific status codes.
+
 ## Notes
 
 - The plugin trims a trailing `.gz` suffix before updating `DefaultRootObject`.

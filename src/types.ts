@@ -67,6 +67,14 @@ export interface CloudfrontToolOptions {
   secret?: string;
   /** Optional AWS session token when using temporary credentials. */
   sessionToken?: string;
+  /**
+   * Enables HTML5 pushstate support by rewriting matching CloudFront custom
+   * error responses to the newly published root object.
+   *
+   * Pass `true` to update both `403` and `404`, or provide an explicit list of
+   * error codes to rewrite.
+   */
+  pushstate?: boolean | number[];
   /** Override for the CloudFront client, primarily useful in tests. */
   client?: CloudFrontClientLike;
 }
@@ -91,6 +99,14 @@ export interface CloudfrontOptions {
   secret?: string;
   /** Optional AWS session token when using temporary credentials. */
   sessionToken?: string;
+  /**
+   * Enables HTML5 pushstate support by rewriting matching CloudFront custom
+   * error responses to the newly published root object.
+   *
+   * Pass `true` to update both `403` and `404`, or provide an explicit list of
+   * error codes to rewrite.
+   */
+  pushstate?: boolean | number[];
   /** Override for the CloudFront client, primarily useful in tests. */
   client?: CloudFrontClientLike;
   /** Pattern used to identify the revisioned HTML file that should become the root object. */
